@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, Matches } from 'class-validator';
-import { Seller } from '../../../domain/service/seller/seller';
+import { Seller, SellerProduct } from '../../../domain/service/seller/seller';
 
 export class TSellerSignUpRequest {
   @IsString()
@@ -33,7 +33,7 @@ export class SellerSignInRequest {
   password: string;
 }
 
-export type TSellerSignInResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+export type TSellerSignInResponse = Pick<Seller, 'id' | 'userId' | 'ceoName' | 'companyName'>;
 
 export type TSellerLeaveResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
 
@@ -60,3 +60,15 @@ export class TSellerChangeInfoRequest {
 }
 
 export type TSellerChangeInfoResponse = Pick<Seller, 'userId' | 'ceoName' | 'companyName'>;
+
+export interface IFindSellerProductResponse {
+  products: SellerProduct[];
+  currentPageNum: number;
+  totalPageNum: number;
+}
+
+export interface ISellerSearchProductResponse {
+  products: SellerProduct[];
+  currentPageNum: number;
+  totalPageNum: number;
+}

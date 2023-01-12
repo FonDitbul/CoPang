@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Session, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Query, Session, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
   TSellerLeaveResponse,
   SellerSignInRequest,
@@ -8,8 +8,10 @@ import {
   TSellerFindUserResponse,
   TSellerChangeInfoRequest,
   TSellerChangeInfoResponse,
+  IFindSellerProductResponse,
+  ISellerSearchProductResponse,
 } from './seller.dto';
-import { ISellerChangeInfoIn, TSellerSignUpIn } from '../../../domain/service/seller/seller';
+import { ISellerChangeInfoIn, TSellerFindProductIn, TSellerSearchProductIn, TSellerSignUpIn } from '../../../domain/service/seller/seller';
 import { ISellerService } from '../../../domain/service/seller/seller.service';
 import { AuthHttpGuard } from '../auth/auth.http.guard';
 import { SessionChangeInfoInterceptor, SessionSignInInterceptor, SessionSignOutInterceptor } from '../auth/auth.interceptor.session';
@@ -52,6 +54,7 @@ export class SellerController {
     const seller = await this.sellerService.signIn(signInSellerRequest);
 
     const response: TSellerSignInResponse = {
+      id: seller.id,
       userId: seller.userId,
       ceoName: seller.ceoName,
       companyName: seller.companyName,
@@ -99,5 +102,46 @@ export class SellerController {
     };
 
     return sellerInformation;
+  }
+
+  @UseGuards(AuthHttpGuard)
+  @Get('/seller/product/search')
+  async findSellerProductSearch(
+    @Session() session: Record<string, any>,
+    @Query('text') text: string,
+    @Query('sortBy') sortBy = 'id',
+    @Query('order') order = 'desc',
+    @Query('pageNum') pageNum = 1,
+  ) {
+    const sellerId: number = session.user.id;
+    const condition: TSellerSearchProductIn = {
+      sellerId: sellerId,
+      text: text,
+      sortBy: sortBy,
+      order: order,
+      pageNum: pageNum,
+    };
+    const productArray: ISellerSearchProductResponse = await this.sellerService.searchProduct(condition);
+    return productArray;
+  }
+
+  @UseGuards(AuthHttpGuard)
+  @Get('/seller/product')
+  async findSellerProduct(
+    @Session() session: Record<string, any>,
+    @Query('sortBy') sortBy = 'id',
+    @Query('order') order = 'desc',
+    @Query('pageNum') pageNum = 1,
+  ) {
+    const sellerId: number = session.user.id;
+    const productCondition: TSellerFindProductIn = {
+      sellerId: sellerId,
+      sortBy: sortBy,
+      order: order,
+      pageNum: pageNum,
+    };
+    const productArray: IFindSellerProductResponse = await this.sellerService.findProduct(productCondition);
+
+    return productArray;
   }
 }
